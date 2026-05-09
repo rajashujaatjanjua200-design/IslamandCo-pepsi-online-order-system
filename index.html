@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Islam and Co Distribution</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background: #f4f7f6; }
+        .promo-bar { background: #d32f2f; color: white; padding: 12px; font-weight: bold; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        header { background: #002f6c; color: white; text-align: center; padding: 25px 15px; border-bottom: 5px solid #ffca28; }
+        .container { padding: 15px; max-width: 500px; margin: auto; }
+        .card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        .product-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #eee; }
+        .product-info b { color: #002f6c; font-size: 16px; }
+        .price { color: #2e7d32; font-weight: bold; font-size: 18px; margin-top: 5px; }
+        .btn-add { background: #002f6c; color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .whatsapp-btn { background: #25D366; color: white; padding: 18px; width: 100%; border: none; font-size: 18px; font-weight: bold; border-radius: 12px; cursor: pointer; margin-top: 20px; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); }
+        #bill-area { background: #fff; border: 2px solid #333; padding: 20px; margin-top: 25px; display: none; font-family: 'Courier New', monospace; }
+    </style>
+</head>
+<body>
+
+<div class="promo-bar"><marquee id="promo-text">Islam and Co Distribution Online Portal...</marquee></div>
+
+<header>
+    <h1 style="margin:0; font-size: 24px;">Islam and Co Distribution</h1>
+    <p style="margin:5px 0; opacity: 0.9;">Online Ordering Portal</p>
+    <p style="margin:0; font-size: 14px; background: rgba(255,255,255,0.2); display: inline-block; padding: 2px 10px; border-radius: 10px;">Managed by Mr. Shujaat</p>
+</header>
+
+<div class="container">
+    <div class="card">
+        <h3 style="margin-top:0;">Retailer Details</h3>
+        <input type="text" id="cName" placeholder="Customer Name">
+        <input type="text" id="sName" placeholder="Shop Name / Address">
+        <input type="number" id="cPhone" placeholder="WhatsApp Number">
+    </div>
+
+    <div class="card">
+        <h3 style="margin-top:0;">Products List</h3>
+        <div id="loading" style="text-align:center; padding: 20px;">Updating live rates...</div>
+        <div id="p-list"></div>
+    </div>
+
+    <div id="bill-area">
+        <center>
+            <h3 style="margin:0;">ISLAM AND CO</h3>
+            <p style="margin:5px 0;">Digital Order Receipt</p>
+            <small id="b-date"></small>
+            <hr>
+        </center>
+        <div id="b-items"></div>
+        <hr>
+        <div style="display:flex; justify-content:space-between; font-size: 18px; font-weight: bold;">
+            <span>Net Total Amount:</span>
+            <span id="b-total"></span>
+        </div>
+        <button class="whatsapp-btn" onclick="sendOrder()">WhatsApp Share ✅</button>
+    </div>
+</div>
+
+<script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycby7XH8uXG5da5GXus1EvWMX1rinoFVbb3A2gcrnPN6tNnbBATM5BqLUeFPgBZSmHeakRg/exec'; 
+    let cart = [];
+
+    async function loadData() {
+        try {
+            const res = await fetch(scriptURL);
+            const data = await res.json();
+            document.getElementById('promo-text').innerText = data.promo;
+            renderProducts(data.products);
+            document.getElementById('loading').style.display = 'none';
+        } catch (e) { document.getElementById('loading').innerText = "Connecting to Sheet..."; }
+    }
+
+    function renderProducts(products) {
+        const list = document.getElementById('p-list');
+        list.innerHTML = products.map(p => `
+            <div class="product-item">
+                <div class="product-info">
+                    <b>${p.pack}</b><br>
+                    <small>${p.brand}</small><br>
+                    <div class="price">Rs. ${p.rate}</div>
+                    ${p.discount > 0 ? `<small style="color:red;">Discount: Rs. ${p.discount}</small>` : ''}
+                </div>
+                <button class="btn-add" onclick="add('${p.pack}', ${p.rate}, ${p.discount})">Add 🛒</button>
+            </div>
+        `).join('');
+    }
+
+    function add(name, rate, disc) {
+        document.getElementById('bill-area').style.display = 'block';
+        cart.push({ name, price: rate - disc });
+        updateBill();
+    }
+
+    function updateBill() {
+        const bItems = document.getElementById('b-items');
+        let total = 0;
+        bItems.innerHTML = cart.map((item, i) => {
+            total += item.price;
+            return `<div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                <span>${item.name}</span>
+                <span>Rs. ${item.price} <span style="color:red; cursor:pointer;" onclick="remove(${i})">❌</span></span>
+            </div>`;
+        }).join('');
+        document.getElementById('b-total').innerText = 'Rs. ' + total;
+        document.getElementById('b-date').innerText = new Date().toLocaleString();
+    }
+
+    function remove(i) { cart.splice(i,1); updateBill(); if(cart.length==0) document.getElementById('bill-area').style.display='none'; }
+
+    function sendOrder() {
+        const n = document.getElementById('cName').value;
+        const s = document.getElementById('sName').value;
+        const p = document.getElementById('cPhone').value;
+        const t = document.getElementById('b-total').innerText;
+        if(!n || !s || cart.length==0) { alert("Details enter karein!"); return; }
+
+        let msg = `*Islam and Co Distribution Order*%0A*Managed by: Mr. Shujaat*%0A---%0A*Name:* ${n}%0A*Shop:* ${s}%0A*Phone:* ${p}%0A---%0A*Order:*%0A`;
+        cart.forEach(i => msg += `- ${i.name}: Rs. ${i.price}%0A`);
+        msg += `---%0A*Net Total: ${t}*%0A_Digital Receipt Generated_`;
+        window.open(`https://wa.me/?text=${msg}`, '_blank');
+    }
+
+    loadData();
+</script>
+</body>
+  </html>
