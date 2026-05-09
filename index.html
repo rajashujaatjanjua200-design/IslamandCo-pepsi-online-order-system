@@ -3,128 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Islam and Co Distribution</title>
+    <title>Islam & Co | Pepsi Distribution</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background: #f4f7f6; }
-        .promo-bar { background: #d32f2f; color: white; padding: 12px; font-weight: bold; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        header { background: #002f6c; color: white; text-align: center; padding: 25px 15px; border-bottom: 5px solid #ffca28; }
-        .container { padding: 15px; max-width: 500px; margin: auto; }
-        .card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        .product-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #eee; }
-        .product-info b { color: #002f6c; font-size: 16px; }
-        .price { color: #2e7d32; font-weight: bold; font-size: 18px; margin-top: 5px; }
-        .btn-add { background: #002f6c; color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .whatsapp-btn { background: #25D366; color: white; padding: 18px; width: 100%; border: none; font-size: 18px; font-weight: bold; border-radius: 12px; cursor: pointer; margin-top: 20px; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); }
-        #bill-area { background: #fff; border: 2px solid #333; padding: 20px; margin-top: 25px; display: none; font-family: 'Courier New', monospace; }
+        :root { --primary: #002f6c; --yellow: #ffca28; --danger: #e53935; --dark: #212121; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8f9fa; margin: 0; padding-bottom: 100px; color: var(--dark); }
+        
+        .promo-add { background: var(--danger); color: white; padding: 5px 0; font-size: 11px; font-weight: bold; text-align: center; border-bottom: 2px solid var(--yellow); min-height: 20px; }
+
+        header { background: var(--primary); color: white; padding: 20px 15px; text-align: center; border-bottom: 5px solid var(--yellow); }
+        .highlight-name { font-size: 22px; font-weight: 900; color: #fff; letter-spacing: 1px; line-height: 1.2; }
+        .highlight-sub { font-size: 16px; font-weight: 700; color: var(--yellow); display: block; margin-top: 2px; }
+        
+        .online-glow-badge { 
+            display: inline-block; background: var(--yellow); color: var(--primary); 
+            padding: 4px 12px; border-radius: 50px; font-size: 12px; font-weight: 900; 
+            text-transform: uppercase; animation: glow 1.5s infinite alternate; margin-top: 8px;
+        }
+
+        @keyframes glow { from { transform: scale(1); } to { transform: scale(1.05); } }
+
+        .container { max-width: 440px; margin: auto; padding: 10px; }
+        .card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #eee; }
+        .section-title { font-weight: 800; color: var(--primary); font-size: 12px; margin-bottom: 10px; display: block; border-left: 4px solid var(--yellow); padding-left: 10px; text-transform: uppercase; }
+
+        input, select { width: 100%; padding: 12px; margin-bottom: 8px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
+        .order-row { display: flex; gap: 8px; align-items: center; }
+        .stepper { display: flex; align-items: center; background: #f0f0f0; border-radius: 8px; height: 45px; flex: 1; border: 1px solid #ccc; }
+        .step-btn { background: var(--yellow); border: none; width: 40px; height: 100%; font-weight: bold; font-size: 22px; cursor: pointer; color: var(--primary); }
+        .qty-input { width: 45px !important; border: none !important; text-align: center; background: transparent; font-weight: bold; font-size: 16px; }
+        .btn-add-smart { background: var(--primary); color: var(--yellow); border: none; padding: 0 20px; border-radius: 8px; font-weight: bold; height: 45px; cursor: pointer; }
+
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+        .btn-remove { color: var(--danger); background: none; border: none; cursor: pointer; font-size: 18px; }
+
+        #receipt-container { background: #fff; border: 2px solid #000; padding: 18px; color: #000; }
+        .online-tag { text-align: center; font-size: 9px; font-weight: 900; background: var(--yellow); padding: 4px 0; margin-bottom: 10px; border: 1px solid #000; }
+        .bill-header { display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 10px; align-items: center; }
+        .bill-header b { font-size: 14px; text-transform: uppercase; }
+        .bill-header span { font-size: 10px; display: block; }
+        
+        .bill-info-bar { display: flex; justify-content: space-between; font-size: 9px; font-weight: 900; background: #f2f2f2; padding: 5px; margin-bottom: 10px; border: 1px solid #ddd; }
+        .cust-details-box { font-size: 11px; margin-bottom: 10px; border: 1px dashed #666; padding: 8px; line-height: 1.4; }
+
+        .table-head { display: grid; grid-template-columns: 1.8fr 0.5fr 0.7fr 1fr; font-size: 9px; font-weight: 900; border-bottom: 2px solid #000; padding-bottom: 5px; }
+        .r-line { display: grid; grid-template-columns: 1.8fr 0.5fr 0.7fr 1fr; font-size: 10px; border-bottom: 1px solid #eee; padding: 5px 0; }
+        
+        .total-box { margin-top: 10px; border-top: 2px solid #000; padding-top: 5px; }
+        .total-row { display: flex; justify-content: space-between; font-weight: 900; font-size: 16px; color: var(--primary); }
+        .disc-summary { font-size: 10px; color: var(--danger); text-align: right; font-weight: bold; margin-bottom: 5px; }
+
+        .whatsapp-btn { background: #25D366; color: white; width: 100%; padding: 15px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; margin-top: 12px; cursor: pointer; }
+        .download-btn { background: #007bff; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 14px; font-weight: bold; margin-top: 8px; cursor: pointer; }
+        .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--primary); color: var(--yellow); padding: 12px; display: flex; justify-content: space-between; border-top: 4px solid var(--yellow); font-weight: 900; z-index: 1000; }
     </style>
 </head>
 <body>
 
-<div class="promo-bar"><marquee id="promo-text">Islam and Co Distribution Online Portal...</marquee></div>
+<div class="promo-add" id="promoBar">
+    <marquee id="promoText">Loading offers...</marquee>
+</div>
 
 <header>
-    <h1 style="margin:0; font-size: 24px;">Islam and Co Distribution</h1>
-    <p style="margin:5px 0; opacity: 0.9;">Online Ordering Portal</p>
-    <p style="margin:0; font-size: 14px; background: rgba(255,255,255,0.2); display: inline-block; padding: 2px 10px; border-radius: 10px;">Managed by Mr. Shujaat</p>
+    <div class="highlight-name">ISLAM & CO</div>
+    <div class="highlight-sub">PEPSI DISTRIBUTION</div>
+    <div class="online-glow-badge">⚡ ONLINE ORDER PORTAL ⚡</div>
 </header>
 
 <div class="container">
     <div class="card">
-        <h3 style="margin-top:0;">Retailer Details</h3>
-        <input type="text" id="cName" placeholder="Customer Name">
-        <input type="text" id="sName" placeholder="Shop Name / Address">
-        <input type="number" id="cPhone" placeholder="WhatsApp Number">
+        <span class="section-title">Retailer Details</span>
+        <input type="text" id="shopName" placeholder="Shop Name">
+        <input type="text" id="custName" placeholder="Owner Name">
+        <input type="number" id="custPhone" placeholder="Mobile Number">
+        <input type="text" id="shopAddr" placeholder="Address">
     </div>
 
     <div class="card">
-        <h3 style="margin-top:0;">Products List</h3>
-        <div id="loading" style="text-align:center; padding: 20px;">Updating live rates...</div>
-        <div id="p-list"></div>
+        <span class="section-title">Add to Cart 🛒</span>
+        <select id="prodSelect"><option value="">-- Select Product --</option></select>
+        <div class="order-row">
+            <div class="stepper">
+                <button class="step-btn" onclick="stepQty(-1)">-</button>
+                <input type="number" id="orderQty" class="qty-input" value="1">
+                <button class="step-btn" onclick="stepQty(1)">+</button>
+            </div>
+            <button class="btn-add-smart" onclick="addItem()">ADD</button>
+        </div>
+        <div id="cartView" style="margin-top: 10px; display:none;"><div id="cartItemsList"></div></div>
     </div>
 
-    <div id="bill-area">
-        <center>
-            <h3 style="margin:0;">ISLAM AND CO</h3>
-            <p style="margin:5px 0;">Digital Order Receipt</p>
-            <small id="b-date"></small>
-            <hr>
-        </center>
-        <div id="b-items"></div>
-        <hr>
-        <div style="display:flex; justify-content:space-between; font-size: 18px; font-weight: bold;">
-            <span>Net Total Amount:</span>
-            <span id="b-total"></span>
+    <div class="card">
+        <div id="receipt-container">
+            <div class="online-tag">ONLINE ORDER INVOICE</div>
+            <div class="bill-header">
+                <div><b>Islam & Co</b><span>Pepsi Distribution</span></div>
+                <div style="font-size: 7px; text-align: right;">CHOA SAIDAN SHAH</div>
+            </div>
+            <div class="bill-info-bar">
+                <span>INV: <span id="billNo">#0000</span></span>
+                <span>DATE: <span id="billDate">--/--/--</span></span>
+                <span>TIME: <span id="billTime">00:00</span></span>
+            </div>
+            <div id="dispDetails" class="cust-details-box">
+                <b>SHOP:</b> <span id="rShop">---</span><br>
+                <b>OWNER:</b> <span id="rName">---</span><br>
+                <b>PHONE:</b> <span id="rPhone">---</span><br>
+                <b>ADDRESS:</b> <span id="rAddr">---</span>
+            </div>
+            <div class="table-head"><span>ITEM</span><span>QTY</span><span>DISC.</span><span style="text-align:right">TOTAL</span></div>
+            <div id="rItemsList"></div>
+            <div class="total-box">
+                <div id="totalDiscLine" class="disc-summary"></div>
+                <div class="total-row"><span>GRAND TOTAL:</span><span id="rTotal">Rs. 0</span></div>
+            </div>
+            <div style="font-size: 8px; margin-top: 10px; text-align: center; font-weight: bold; color: #666;">Software by Shujaat Raja</div>
         </div>
-        <button class="whatsapp-btn" onclick="sendOrder()">WhatsApp Share ✅</button>
+        <button class="whatsapp-btn" onclick="sendWhatsApp()">Confirm on WhatsApp ✅</button>
+        <button class="download-btn" onclick="downloadBill()">Download Bill (HD) 📥</button>
     </div>
 </div>
 
+<div class="bottom-bar">
+    <div>ITEMS: <span id="totalQty">0</span></div>
+    <div>TOTAL: <span id="totalAmt">Rs. 0</span></div>
+</div>
+
 <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycby7XH8uXG5da5GXus1EvWMX1rinoFVbb3A2gcrnPN6tNnbBATM5BqLUeFPgBZSmHeakRg/exec'; 
-    let cart = [];
+    const scriptURL = 'https://script.google.com/macros/s/AKfycby7XH8uXG5da5GXus1EvWMX1rinoFVbb3A2gcrnPN6tNnbBATM5BqLUeFPgBZSmHeakRg/exec';
+    let products = [], cart = [];
 
     async function loadData() {
         try {
             const res = await fetch(scriptURL);
             const data = await res.json();
-            document.getElementById('promo-text').innerText = data.promo;
-            renderProducts(data.products);
-            document.getElementById('loading').style.display = 'none';
-        } catch (e) { document.getElementById('loading').innerText = "Connecting to Sheet..."; }
+            if(data.promo) document.getElementById('promoText').innerText = data.promo;
+            products = data.products;
+            const sel = document.getElementById('prodSelect');
+            products.forEach((p, i) => {
+                let opt = document.createElement('option');
+                opt.value = i; opt.innerText = `${p.pack} (Rs. ${p.rate})`;
+                sel.appendChild(opt);
+            });
+            const now = new Date();
+            document.getElementById('billDate').innerText = now.toLocaleDateString('en-GB');
+            document.getElementById('billTime').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('billNo').innerText = "#IC-" + Math.floor(1000 + Math.random() * 9000);
+        } catch(e) { document.getElementById('promoText').innerText = "Islam & Co Pepsi Distribution"; }
     }
 
-    function renderProducts(products) {
-        const list = document.getElementById('p-list');
-        list.innerHTML = products.map(p => `
-            <div class="product-item">
-                <div class="product-info">
-                    <b>${p.pack}</b><br>
-                    <small>${p.brand}</small><br>
-                    <div class="price">Rs. ${p.rate}</div>
-                    ${p.discount > 0 ? `<small style="color:red;">Discount: Rs. ${p.discount}</small>` : ''}
-                </div>
-                <button class="btn-add" onclick="add('${p.pack}', ${p.rate}, ${p.discount})">Add 🛒</button>
-            </div>
-        `).join('');
+    function stepQty(delta) {
+        const q = document.getElementById('orderQty');
+        q.value = Math.max(1, (parseInt(q.value) || 1) + delta);
     }
 
-    function add(name, rate, disc) {
-        document.getElementById('bill-area').style.display = 'block';
-        cart.push({ name, price: rate - disc });
-        updateBill();
+    function addItem() {
+        const idx = document.getElementById('prodSelect').value;
+        const qty = parseInt(document.getElementById('orderQty').value) || 1;
+        if(!idx) return;
+        const p = products[idx];
+        const exists = cart.find(item => item.pack === p.pack);
+        if(!exists) cart.push({ ...p, qty: qty });
+        else exists.qty += qty;
+        updateSummary();
     }
 
-    function updateBill() {
-        const bItems = document.getElementById('b-items');
-        let total = 0;
-        bItems.innerHTML = cart.map((item, i) => {
-            total += item.price;
-            return `<div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                <span>${item.name}</span>
-                <span>Rs. ${item.price} <span style="color:red; cursor:pointer;" onclick="remove(${i})">❌</span></span>
-            </div>`;
-        }).join('');
-        document.getElementById('b-total').innerText = 'Rs. ' + total;
-        document.getElementById('b-date').innerText = new Date().toLocaleString();
+    function removeItem(index) { cart.splice(index, 1); updateSummary(); }
+
+    function updateSummary() {
+        let grandTotal = 0, qSum = 0, totalDisc = 0, rHtml = "";
+        document.getElementById('cartView').style.display = cart.length > 0 ? 'block' : 'none';
+        
+        let cartHtml = "";
+        cart.forEach((item, index) => {
+            let rate = parseFloat(item.rate) || 0;
+            let disc = parseFloat(item.discount) || 0;
+            let subtotal = (rate - disc) * item.qty;
+            grandTotal += subtotal;
+            qSum += item.qty;
+            totalDisc += (disc * item.qty);
+            cartHtml += `<div class="cart-item"><span><b>${item.qty}x</b> ${item.pack}</span><button class="btn-remove" onclick="removeItem(${index})">🗑️</button></div>`;
+            rHtml += `<div class="r-line"><span>${item.pack}</span><span>x${item.qty}</span><span>-${disc}</span><span style="text-align:right">${subtotal.toLocaleString()}</span></div>`;
+        });
+
+        document.getElementById('cartItemsList').innerHTML = cartHtml;
+        document.getElementById('rItemsList').innerHTML = rHtml;
+        document.getElementById('totalQty').innerText = qSum;
+        document.getElementById('totalAmt').innerText = "Rs. " + grandTotal.toLocaleString();
+        document.getElementById('rTotal').innerText = "Rs. " + grandTotal.toLocaleString();
+        document.getElementById('totalDiscLine').innerText = totalDisc > 0 ? `Total Discount: Rs. ${totalDisc.toLocaleString()}` : "";
+        document.getElementById('rShop').innerText = document.getElementById('shopName').value.toUpperCase() || '---';
+        document.getElementById('rName').innerText = document.getElementById('custName').value || '---';
+        document.getElementById('rPhone').innerText = document.getElementById('custPhone').value || '---';
+        document.getElementById('rAddr').innerText = document.getElementById('shopAddr').value || '---';
     }
 
-    function remove(i) { cart.splice(i,1); updateBill(); if(cart.length==0) document.getElementById('bill-area').style.display='none'; }
-
-    function sendOrder() {
-        const n = document.getElementById('cName').value;
-        const s = document.getElementById('sName').value;
-        const p = document.getElementById('cPhone').value;
-        const t = document.getElementById('b-total').innerText;
-        if(!n || !s || cart.length==0) { alert("Details enter karein!"); return; }
-
-        let msg = `*Islam and Co Distribution Order*%0A*Managed by: Mr. Shujaat*%0A---%0A*Name:* ${n}%0A*Shop:* ${s}%0A*Phone:* ${p}%0A---%0A*Order:*%0A`;
-        cart.forEach(i => msg += `- ${i.name}: Rs. ${i.price}%0A`);
-        msg += `---%0A*Net Total: ${t}*%0A_Digital Receipt Generated_`;
-        window.open(`https://wa.me/?text=${msg}`, '_blank');
+    function downloadBill() {
+        if(cart.length === 0) return alert("Pehle items add karein!");
+        const element = document.getElementById('receipt-container');
+        html2canvas(element, { scale: 3 }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `Bill_${document.getElementById('shopName').value || 'IslamCo'}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        });
     }
 
+    function sendWhatsApp() {
+        if(cart.length === 0) return alert("Pehle items add karein!");
+        let shop = document.getElementById('shopName').value || 'N/A';
+        let owner = document.getElementById('custName').value || 'N/A';
+        let phone = document.getElementById('custPhone').value || 'N/A';
+        let addr = document.getElementById('shopAddr').value || 'N/A';
+        let total = document.getElementById('rTotal').innerText;
+        let tDisc = document.getElementById('totalDiscLine').innerText;
+
+        let msg = `*📦 NEW ORDER: ISLAM & CO*\n`;
+        msg += `*Shop:* ${shop}\n*Owner:* ${owner}\n*Phone:* ${phone}\n*Address:* ${addr}\n`;
+        msg += `--------------------------\n`;
+        cart.forEach((i, idx) => { 
+            let dText = i.discount > 0 ? ` (Disc: -${i.discount})` : "";
+            msg += `${idx+1}. ${i.pack} x${i.qty}${dText}\n`; 
+        });
+        msg += `--------------------------\n`;
+        if(tDisc) msg += `*${tDisc}*\n`;
+        msg += `*Grand Total: ${total}*\n`;
+        msg += `_Order via Portal_`;
+        window.location.href = `https://wa.me/923465846781?text=${encodeURIComponent(msg)}`;
+    }
+
+    ['shopName', 'custName', 'custPhone', 'shopAddr'].forEach(id => {
+        document.getElementById(id).addEventListener('input', updateSummary);
+    });
     loadData();
 </script>
 </body>
-  </html>
+</html>
