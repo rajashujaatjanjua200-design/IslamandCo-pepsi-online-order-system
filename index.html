@@ -6,7 +6,7 @@
     <title>Islam & Co | Pepsi Distribution</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root { --primary: #002f6c; --yellow: #ffca28; --danger: #e53935; --dark: #212121; }
+        :root { --primary: #002f6c; --yellow: #ffca28; --danger: #e53935; --dark: #212121; --whatsapp: #25D366; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8f9fa; margin: 0; padding-bottom: 100px; color: var(--dark); }
         
         .promo-add { background: var(--danger); color: white; padding: 5px 0; font-size: 11px; font-weight: bold; text-align: center; border-bottom: 2px solid var(--yellow); min-height: 20px; }
@@ -53,9 +53,11 @@
         .total-row { display: flex; justify-content: space-between; font-weight: 900; font-size: 16px; color: var(--primary); }
         .disc-summary { font-size: 10px; color: var(--danger); text-align: right; font-weight: bold; margin-bottom: 5px; }
 
-        .whatsapp-btn { background: #25D366; color: white; width: 100%; padding: 15px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; margin-top: 12px; cursor: pointer; }
+        .whatsapp-btn { background: var(--whatsapp); color: white; width: 100%; padding: 15px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; margin-top: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .download-btn { background: #007bff; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 14px; font-weight: bold; margin-top: 8px; cursor: pointer; }
         .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--primary); color: var(--yellow); padding: 12px; display: flex; justify-content: space-between; border-top: 4px solid var(--yellow); font-weight: 900; z-index: 1000; }
+        
+        .wa-selector-box { background: #e9f7ef; border: 2px solid var(--whatsapp); border-radius: 8px; padding: 10px; margin-top: 5px; }
     </style>
 </head>
 <body>
@@ -77,6 +79,20 @@
         <input type="text" id="custName" placeholder="Owner Name">
         <input type="number" id="custPhone" placeholder="Mobile Number">
         <input type="text" id="shopAddr" placeholder="Address">
+        
+        <div class="wa-selector-box">
+            <label style="font-size: 11px; font-weight: bold; color: var(--whatsapp);">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="14" style="vertical-align: middle;"> SELECT CONTACT PERSON:
+            </label>
+            <select id="wa_contact_select" style="margin-top: 5px; margin-bottom: 0; border: 1px solid var(--whatsapp);">
+                <option value="923465846781">Asiam Hussain</option>
+                <option value="923061645603">Saqib Abbas</option>
+                <option value="923105714429">Naqeeb ur Rehman</option>
+                <option value="923150564149">Asim Raza</option>
+                <option value="923461649698">Arslan Sajid</option>
+                <option value="923415011140">Adnan Hassan</option>
+            </select>
+        </div>
     </div>
 
     <div class="card">
@@ -119,7 +135,9 @@
             </div>
             <div style="font-size: 8px; margin-top: 10px; text-align: center; font-weight: bold; color: #666;">Software by Shujaat Raja</div>
         </div>
-        <button class="whatsapp-btn" onclick="sendWhatsApp()">Confirm on WhatsApp ✅</button>
+        <button class="whatsapp-btn" onclick="sendWhatsApp()">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="20"> Confirm on WhatsApp ✅
+        </button>
         <button class="download-btn" onclick="downloadBill()">Download Bill (HD) 📥</button>
     </div>
 </div>
@@ -211,6 +229,10 @@
 
     function sendWhatsApp() {
         if(cart.length === 0) return alert("Pehle items add karein!");
+        
+        // Dynamic Number selection from dropdown
+        let selectedNumber = document.getElementById('wa_contact_select').value;
+        
         let shop = document.getElementById('shopName').value || 'N/A';
         let owner = document.getElementById('custName').value || 'N/A';
         let phone = document.getElementById('custPhone').value || 'N/A';
@@ -229,7 +251,9 @@
         if(tDisc) msg += `*${tDisc}*\n`;
         msg += `*Grand Total: ${total}*\n`;
         msg += `_Order via Portal_`;
-        window.location.href = `https://wa.me/923465846781?text=${encodeURIComponent(msg)}`;
+        
+        // Final WhatsApp Link using selected number
+        window.location.href = `https://wa.me/${selectedNumber}?text=${encodeURIComponent(msg)}`;
     }
 
     ['shopName', 'custName', 'custPhone', 'shopAddr'].forEach(id => {
