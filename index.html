@@ -8,7 +8,7 @@
     <style>
         :root { --primary: #002f6c; --yellow: #ffca28; --danger: #e53935; --dark: #212121; --whatsapp: #25D366; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8f9fa; margin: 0; padding-bottom: 100px; color: var(--dark); }
-        .promo-add { background: var(--danger); color: white; padding: 5px 0; font-size: 11px; font-weight: bold; text-align: center; border-bottom: 2px solid var(--yellow); min-height: 20px; }
+        .promo-add { background: var(--danger); color: white; padding: 5px 0; font-size: 11px; font-weight: bold; text-align: center; border-bottom: 2px solid var(--yellow); min-height: 25px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         header { background: var(--primary); color: white; padding: 20px 15px; text-align: center; border-bottom: 5px solid var(--yellow); }
         .highlight-name { font-size: 22px; font-weight: 900; color: #fff; letter-spacing: 1px; line-height: 1.2; }
         .highlight-sub { font-size: 16px; font-weight: 700; color: var(--yellow); display: block; margin-top: 2px; }
@@ -63,7 +63,9 @@
     </div>
 </div>
 
-<div class="promo-add" id="promoBar"><marquee id="promoText">Islam & Co Pepsi Distribution</marquee></div>
+<div class="promo-add" id="promoBar">
+    <marquee id="promoText" scrollamount="5">Islam & Co Pepsi Distribution</marquee>
+</div>
 
 <header>
     <div class="highlight-name">ISLAM & CO</div>
@@ -145,7 +147,7 @@
 <script>
     const scriptURL = 'https://script.google.com/macros/s/AKfycbwEo9rAqSgGTmumcwFmwAQEz5jYQ4NmuPIPY4b7TXECoveruolrFFe70BjyHPYPyBg7XQ/exec';
     let products = [], cart = [], userLocation = "";
-    let finalTotalDiscount = 0; // Global discount tracker
+    let finalTotalDiscount = 0;
 
     async function loadData() {
         try {
@@ -157,6 +159,15 @@
                 opt.value = i; opt.innerText = `${p.name} (Rs. ${p.rate})`;
                 sel.appendChild(opt);
             });
+            
+            // Agar rates mein koi special promo text hai to woh yahan se update hoga
+            // Warna jo HTML mein likha hai wohi nazar ayega
+            const promoRes = await fetch(scriptURL + "?get=promo");
+            const promoData = await promoRes.json();
+            if(promoData && promoData.text) {
+                document.getElementById('promoText').innerText = promoData.text;
+            }
+
             const now = new Date();
             document.getElementById('billDate').innerText = now.toLocaleDateString('en-GB');
             document.getElementById('billTime').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
