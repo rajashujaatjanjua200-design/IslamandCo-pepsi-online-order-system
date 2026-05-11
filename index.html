@@ -145,45 +145,41 @@
 </div>
 
 <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbwEo9rAqSgGTmumcwFmwAQEz5jYQ4NmuPIPY4b7TXECoveruolrFFe70BjyHPYPyBg7XQ/exec';
+    // Aapka naya Deployment URL yahan set kar diya hai
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbwj6LJZgD3vRW6amLZEacDJ2Q7aVzufv30FEKRAq-ynMrZjRQB-X-qW640X3qPe_kUn/exec';
     let products = [], cart = [], userLocation = "";
     let finalTotalDiscount = 0;
 
-    // Time aur Date ko live update karne ka function
     function updateLiveDateTime() {
         const now = new Date();
-        const dateStr = now.toLocaleDateString('en-GB'); // DD/MM/YYYY
-        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        
-        document.getElementById('billDate').innerText = dateStr;
-        document.getElementById('billTime').innerText = timeStr;
+        document.getElementById('billDate').innerText = now.toLocaleDateString('en-GB');
+        document.getElementById('billTime').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
 
     async function loadData() {
         try {
-            // Live time foran set karein
             updateLiveDateTime();
-            // Har second baad time update hota rahega
             setInterval(updateLiveDateTime, 1000);
-
-            // Unique Invoice Number
             document.getElementById('billNo').innerText = "#IC-" + Math.floor(100000 + Math.random() * 900000);
 
+            // Rates aur Promo ek hi request mein load honge
             const res = await fetch(scriptURL + "?get=rates");
-            products = await res.json();
+            const data = await res.json();
+            
+            products = data.rates;
+            
+            // Promo update logic
+            if(data.promo) {
+                document.getElementById('promoText').innerText = data.promo;
+            }
+
             const sel = document.getElementById('prodSelect');
             products.forEach((p, i) => {
                 let opt = document.createElement('option');
                 opt.value = i; opt.innerText = `${p.name} (Rs. ${p.rate})`;
                 sel.appendChild(opt);
             });
-            
-            const promoRes = await fetch(scriptURL + "?get=promo");
-            const promoData = await promoRes.json();
-            if(promoData && promoData.text) {
-                document.getElementById('promoText').innerText = promoData.text;
-            }
-        } catch(e) { }
+        } catch(e) { console.error("Error loading data:", e); }
     }
 
     function getLocation() {
@@ -263,21 +259,13 @@
             status: "Pending"
         };
 
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => {
-            controller.abort();
-            finalizeOrder();
-        }, 2000);
-
         try {
             await fetch(scriptURL, { 
                 method: 'POST', 
                 mode: 'no-cors', 
                 headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify({ itemName: "SAVE_ORDER", orderData: postData }),
-                signal: controller.signal
+                body: JSON.stringify({ itemName: "SAVE_ORDER", orderData: postData })
             });
-            clearTimeout(timeoutId);
             finalizeOrder();
         } catch (e) {
             finalizeOrder();
@@ -286,10 +274,7 @@
 
     function finalizeOrder() {
         const confirmBtn = document.getElementById('confirmBtn');
-        confirmBtn.innerText = "Confirm";
-        confirmBtn.disabled = false;
-        closeModal();
-        sendWhatsApp();
+        confirmBtn.innerText = "Confirm"; confirmBtn.disabled = false; closeModal(); sendWhatsApp();
     }
 
     function sendWhatsApp() {
@@ -298,21 +283,13 @@
         let phone = document.getElementById('custPhone').value || 'N/A';
         let addr = document.getElementById('shopAddr').value || 'N/A';
         let total = document.getElementById('rTotal').innerText;
-        
         let msg = `*📦 NEW ORDER: ISLAM & CO*\n*Inv:* ${document.getElementById('billNo').innerText}\n*Date:* ${document.getElementById('billDate').innerText} | ${document.getElementById('billTime').innerText}\n--------------------------\n*Shop:* ${shop}\n*Owner:* ${owner}\n*Phone:* ${phone}\n*Addr:* ${addr}\n`;
         if(userLocation) msg += `*Location:* ${userLocation}\n`;
         msg += `--------------------------\n*ORDER ITEMS:*\n`;
-        
-        cart.forEach((i, idx) => { 
-            msg += `${idx+1}. ${i.name} x${i.qty}\n`; 
-        });
-        
+        cart.forEach((i, idx) => { msg += `${idx+1}. ${i.name} x${i.qty}\n`; });
         msg += `--------------------------\n`;
-        if(finalTotalDiscount > 0) {
-            msg += `*Total Discount: Rs. ${finalTotalDiscount.toLocaleString()}*\n`;
-        }
+        if(finalTotalDiscount > 0) { msg += `*Total Discount: Rs. ${finalTotalDiscount.toLocaleString()}*\n`; }
         msg += `*Grand Total: ${total}*\n\n_Software by Shujaat Raja_`;
-        
         window.location.href = `https://wa.me/${document.getElementById('wa_contact_select').value}?text=${encodeURIComponent(msg)}`;
     }
 
