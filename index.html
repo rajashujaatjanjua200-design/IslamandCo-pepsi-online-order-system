@@ -29,7 +29,6 @@
 
         input, select { width: 100%; padding: 12px; margin-bottom: 8px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
         
-        /* New Styles for Location & Modal */
         .loc-btn { background: #fff; color: var(--primary); border: 1.5px solid var(--primary); width: 100%; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .loc-btn.active { background: var(--whatsapp); color: white; border-color: var(--whatsapp); }
 
@@ -76,9 +75,9 @@
 <div id="orderModal" class="modal-overlay">
     <div class="modal-box">
         <h3 style="color: var(--primary); margin: 0;">Confirm Order?</h3>
-        <p style="font-size: 14px; color: #555; margin-top: 10px;">کیا آپ اس آرڈر کو واٹس ایپ پر بھیجنا چاہتے ہیں؟</p>
+        <p style="font-size: 14px; color: #555; margin-top: 10px;">کیا آپ اس آرڈر کو سیو اور واٹس ایپ کرنا چاہتے ہیں؟</p>
         <div class="modal-btns">
-            <button class="btn-yes" onclick="processOrder()">جی ہاں (Yes)</button>
+            <button class="btn-yes" id="confirmBtn" onclick="processOrder()">جی ہاں (Yes)</button>
             <button class="btn-no" onclick="closeModal()">نہیں (No)</button>
         </div>
     </div>
@@ -174,25 +173,27 @@
 </div>
 
 <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycby7XH8uXG5da5GXus1EvWMX1rinoFVbb3A2gcrnPN6tNnbBATM5BqLUeFPgBZSmHeakRg/exec';
+    // --- NAYA URL YAHAN UPDATE HO GYA HAI ---
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbwEo9rAqSgGTmumcwFmwAQEz5jYQ4NmuPIPY4b7TXECoveruolrFFe70BjyHPYPyBg7XQ/exec';
     let products = [], cart = [], userLocation = "";
 
     async function loadData() {
         try {
-            const res = await fetch(scriptURL);
+            // Rates fetch karna (Sahi Link ke sath)
+            const res = await fetch(scriptURL + "?get=rates");
             const data = await res.json();
-            if(data.promo) document.getElementById('promoText').innerText = data.promo;
-            products = data.products;
+            products = data;
             const sel = document.getElementById('prodSelect');
             products.forEach((p, i) => {
                 let opt = document.createElement('option');
-                opt.value = i; opt.innerText = `${p.pack} (Rs. ${p.rate})`;
+                opt.value = i; opt.innerText = `${p.name} (Rs. ${p.rate})`;
                 sel.appendChild(opt);
             });
             const now = new Date();
             document.getElementById('billDate').innerText = now.toLocaleDateString('en-GB');
             document.getElementById('billTime').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             document.getElementById('billNo').innerText = "#IC-" + Math.floor(1000 + Math.random() * 9000);
+            document.getElementById('promoText').innerText = "Islam & Co Pepsi Distribution | Managed by Mr. Shujaat";
         } catch(e) { document.getElementById('promoText').innerText = "Islam & Co Pepsi Distribution"; }
     }
 
@@ -205,11 +206,9 @@
                 btn.innerHTML = "✅ Location Attached";
                 btn.classList.add('active');
             }, (err) => {
-                alert("لوکیشن حاصل نہیں ہو سکی۔ براہ کرم موبائل کا GPS آن کریں اور ویب سائٹ کو اجازت دیں۔");
+                alert("Location settings on karein.");
                 btn.innerText = "📍 Location Error";
             });
-        } else {
-            alert("آپ کا براؤزر لوکیشن سپورٹ نہیں کرتا۔");
         }
     }
 
@@ -223,7 +222,7 @@
         const qty = parseInt(document.getElementById('orderQty').value) || 1;
         if(!idx) return;
         const p = products[idx];
-        const exists = cart.find(item => item.pack === p.pack);
+        const exists = cart.find(item => item.name === p.name);
         if(!exists) cart.push({ ...p, qty: qty });
         else exists.qty += qty;
         updateSummary();
@@ -243,8 +242,8 @@
             grandTotal += subtotal;
             qSum += item.qty;
             totalDisc += (disc * item.qty);
-            cartHtml += `<div class="cart-item"><span><b>${item.qty}x</b> ${item.pack}</span><button class="btn-remove" onclick="removeItem(${index})">🗑️</button></div>`;
-            rHtml += `<div class="r-line"><span>${item.pack}</span><span>x${item.qty}</span><span>-${disc}</span><span style="text-align:right">${subtotal.toLocaleString()}</span></div>`;
+            cartHtml += `<div class="cart-item"><span><b>${item.qty}x</b> ${item.name}</span><button class="btn-remove" onclick="removeItem(${index})">🗑️</button></div>`;
+            rHtml += `<div class="r-line"><span>${item.name}</span><span>x${item.qty}</span><span>-${disc}</span><span style="text-align:right">${subtotal.toLocaleString()}</span></div>`;
         });
 
         document.getElementById('cartItemsList').innerHTML = cartHtml;
@@ -270,7 +269,6 @@
         });
     }
 
-    // Modal Control Functions
     function showModal() {
         if(cart.length === 0) return alert("Pehle items add karein!");
         document.getElementById('orderModal').style.display = 'flex';
@@ -280,37 +278,53 @@
         document.getElementById('orderModal').style.display = 'none';
     }
 
-    function processOrder() {
-        closeModal();
-        sendWhatsApp();
+    // --- ORDER SAVE KARNE KA NAYA LOGIC ---
+    async function processOrder() {
+        const confirmBtn = document.getElementById('confirmBtn');
+        const originalText = confirmBtn.innerText;
+        confirmBtn.innerText = "Saving...";
+        confirmBtn.disabled = true;
+
+        let shop = document.getElementById('shopName').value || 'N/A';
+        let orderDetails = cart.map(i => `${i.name} x${i.qty}`).join(", ");
+        let total = document.getElementById('rTotal').innerText;
+
+        let postData = {
+            timestamp: new Date().toLocaleString(),
+            salesman: "App User",
+            shop: shop,
+            details: orderDetails,
+            amount: total,
+            status: "Pending"
+        };
+
+        try {
+            await fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors',
+                cache: 'no-cache',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ itemName: "SAVE_ORDER", orderData: postData })
+            });
+            confirmBtn.innerText = originalText;
+            confirmBtn.disabled = false;
+            closeModal();
+            sendWhatsApp();
+        } catch (e) {
+            closeModal();
+            sendWhatsApp();
+        }
     }
 
     function sendWhatsApp() {
         let selectedNumber = document.getElementById('wa_contact_select').value;
         let shop = document.getElementById('shopName').value || 'N/A';
-        let owner = document.getElementById('custName').value || 'N/A';
-        let phone = document.getElementById('custPhone').value || 'N/A';
-        let addr = document.getElementById('shopAddr').value || 'N/A';
         let total = document.getElementById('rTotal').innerText;
-        let tDisc = document.getElementById('totalDiscLine').innerText;
-
-        let msg = `*📦 NEW ORDER: ISLAM & CO*\n`;
-        msg += `*Shop:* ${shop}\n*Owner:* ${owner}\n*Phone:* ${phone}\n*Address:* ${addr}\n`;
-        
-        if(userLocation) {
-            msg += `*Location:* ${userLocation}\n`;
-        }
-
+        let msg = `*📦 NEW ORDER: ISLAM & CO*\n*Shop:* ${shop}\n`;
+        if(userLocation) msg += `*Location:* ${userLocation}\n`;
         msg += `--------------------------\n`;
-        cart.forEach((i, idx) => { 
-            let dText = i.discount > 0 ? ` (Disc: -${i.discount})` : "";
-            msg += `${idx+1}. ${i.pack} x${i.qty}${dText}\n`; 
-        });
-        msg += `--------------------------\n`;
-        if(tDisc) msg += `*${tDisc}*\n`;
-        msg += `*Grand Total: ${total}*\n`;
-        msg += `_Order via Portal_`;
-        
+        cart.forEach((i, idx) => { msg += `${idx+1}. ${i.name} x${i.qty}\n`; });
+        msg += `--------------------------\n*Grand Total: ${total}*`;
         window.location.href = `https://wa.me/${selectedNumber}?text=${encodeURIComponent(msg)}`;
     }
 
