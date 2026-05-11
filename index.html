@@ -116,7 +116,7 @@
                 <div style="font-size: 7px; text-align: right;">CHOA SAIDAN SHAH</div>
             </div>
             <div class="bill-info-bar">
-                <span>INV: <span id="billNo">#0000</span></span>
+                <span>INV: <span id="billNo">#IC-0000</span></span>
                 <span>DATE: <span id="billDate">--/--/--</span></span>
                 <span>TIME: <span id="billTime">00:00</span></span>
             </div>
@@ -149,8 +149,26 @@
     let products = [], cart = [], userLocation = "";
     let finalTotalDiscount = 0;
 
+    // Time aur Date ko live update karne ka function
+    function updateLiveDateTime() {
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('en-GB'); // DD/MM/YYYY
+        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        
+        document.getElementById('billDate').innerText = dateStr;
+        document.getElementById('billTime').innerText = timeStr;
+    }
+
     async function loadData() {
         try {
+            // Live time foran set karein
+            updateLiveDateTime();
+            // Har second baad time update hota rahega
+            setInterval(updateLiveDateTime, 1000);
+
+            // Unique Invoice Number
+            document.getElementById('billNo').innerText = "#IC-" + Math.floor(100000 + Math.random() * 900000);
+
             const res = await fetch(scriptURL + "?get=rates");
             products = await res.json();
             const sel = document.getElementById('prodSelect');
@@ -160,18 +178,11 @@
                 sel.appendChild(opt);
             });
             
-            // Agar rates mein koi special promo text hai to woh yahan se update hoga
-            // Warna jo HTML mein likha hai wohi nazar ayega
             const promoRes = await fetch(scriptURL + "?get=promo");
             const promoData = await promoRes.json();
             if(promoData && promoData.text) {
                 document.getElementById('promoText').innerText = promoData.text;
             }
-
-            const now = new Date();
-            document.getElementById('billDate').innerText = now.toLocaleDateString('en-GB');
-            document.getElementById('billTime').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            document.getElementById('billNo').innerText = "#IC-" + Math.floor(1000 + Math.random() * 9000);
         } catch(e) { }
     }
 
@@ -288,7 +299,7 @@
         let addr = document.getElementById('shopAddr').value || 'N/A';
         let total = document.getElementById('rTotal').innerText;
         
-        let msg = `*📦 NEW ORDER: ISLAM & CO*\n*Inv:* ${document.getElementById('billNo').innerText}\n--------------------------\n*Shop:* ${shop}\n*Owner:* ${owner}\n*Phone:* ${phone}\n*Addr:* ${addr}\n`;
+        let msg = `*📦 NEW ORDER: ISLAM & CO*\n*Inv:* ${document.getElementById('billNo').innerText}\n*Date:* ${document.getElementById('billDate').innerText} | ${document.getElementById('billTime').innerText}\n--------------------------\n*Shop:* ${shop}\n*Owner:* ${owner}\n*Phone:* ${phone}\n*Addr:* ${addr}\n`;
         if(userLocation) msg += `*Location:* ${userLocation}\n`;
         msg += `--------------------------\n*ORDER ITEMS:*\n`;
         
@@ -309,4 +320,4 @@
     loadData();
 </script>
 </body>
-</html>
+    </html>
