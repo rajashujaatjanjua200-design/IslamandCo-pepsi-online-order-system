@@ -28,6 +28,17 @@
         .section-title { font-weight: 800; color: var(--primary); font-size: 12px; margin-bottom: 10px; display: block; border-left: 4px solid var(--yellow); padding-left: 10px; text-transform: uppercase; }
 
         input, select { width: 100%; padding: 12px; margin-bottom: 8px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
+        
+        /* New Styles for Location & Modal */
+        .loc-btn { background: #fff; color: var(--primary); border: 1.5px solid var(--primary); width: 100%; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .loc-btn.active { background: var(--whatsapp); color: white; border-color: var(--whatsapp); }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; align-items: center; justify-content: center; }
+        .modal-box { background: white; width: 85%; max-width: 320px; padding: 25px; border-radius: 15px; text-align: center; }
+        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-yes { flex: 1; background: var(--whatsapp); color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-no { flex: 1; background: #eee; color: #333; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
         .order-row { display: flex; gap: 8px; align-items: center; }
         .stepper { display: flex; align-items: center; background: #f0f0f0; border-radius: 8px; height: 45px; flex: 1; border: 1px solid #ccc; }
         .step-btn { background: var(--yellow); border: none; width: 40px; height: 100%; font-weight: bold; font-size: 22px; cursor: pointer; color: var(--primary); }
@@ -62,6 +73,17 @@
 </head>
 <body>
 
+<div id="orderModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3 style="color: var(--primary); margin: 0;">Confirm Order?</h3>
+        <p style="font-size: 14px; color: #555; margin-top: 10px;">کیا آپ اس آرڈر کو واٹس ایپ پر بھیجنا چاہتے ہیں؟</p>
+        <div class="modal-btns">
+            <button class="btn-yes" onclick="processOrder()">جی ہاں (Yes)</button>
+            <button class="btn-no" onclick="closeModal()">نہیں (No)</button>
+        </div>
+    </div>
+</div>
+
 <div class="promo-add" id="promoBar">
     <marquee id="promoText">Loading offers...</marquee>
 </div>
@@ -79,6 +101,10 @@
         <input type="text" id="custName" placeholder="Owner Name">
         <input type="number" id="custPhone" placeholder="Mobile Number">
         <input type="text" id="shopAddr" placeholder="Address">
+        
+        <button type="button" class="loc-btn" id="locBtn" onclick="getLocation()">
+            📍 Share My Location (Optional)
+        </button>
         
         <div class="wa-selector-box">
             <label style="font-size: 11px; font-weight: bold; color: var(--whatsapp);">
@@ -135,7 +161,7 @@
             </div>
             <div style="font-size: 8px; margin-top: 10px; text-align: center; font-weight: bold; color: #666;">Software by Shujaat Raja</div>
         </div>
-        <button class="whatsapp-btn" onclick="sendWhatsApp()">
+        <button class="whatsapp-btn" onclick="showModal()">
             <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="20"> Confirm on WhatsApp ✅
         </button>
         <button class="download-btn" onclick="downloadBill()">Download Bill (HD) 📥</button>
@@ -149,7 +175,7 @@
 
 <script>
     const scriptURL = 'https://script.google.com/macros/s/AKfycby7XH8uXG5da5GXus1EvWMX1rinoFVbb3A2gcrnPN6tNnbBATM5BqLUeFPgBZSmHeakRg/exec';
-    let products = [], cart = [];
+    let products = [], cart = [], userLocation = "";
 
     async function loadData() {
         try {
@@ -168,6 +194,23 @@
             document.getElementById('billTime').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             document.getElementById('billNo').innerText = "#IC-" + Math.floor(1000 + Math.random() * 9000);
         } catch(e) { document.getElementById('promoText').innerText = "Islam & Co Pepsi Distribution"; }
+    }
+
+    function getLocation() {
+        const btn = document.getElementById('locBtn');
+        if (navigator.geolocation) {
+            btn.innerText = "⌛ Fetching GPS...";
+            navigator.geolocation.getCurrentPosition((pos) => {
+                userLocation = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                btn.innerHTML = "✅ Location Attached";
+                btn.classList.add('active');
+            }, (err) => {
+                alert("لوکیشن حاصل نہیں ہو سکی۔ براہ کرم موبائل کا GPS آن کریں اور ویب سائٹ کو اجازت دیں۔");
+                btn.innerText = "📍 Location Error";
+            });
+        } else {
+            alert("آپ کا براؤزر لوکیشن سپورٹ نہیں کرتا۔");
+        }
     }
 
     function stepQty(delta) {
@@ -227,12 +270,23 @@
         });
     }
 
-    function sendWhatsApp() {
+    // Modal Control Functions
+    function showModal() {
         if(cart.length === 0) return alert("Pehle items add karein!");
-        
-        // Dynamic Number selection from dropdown
+        document.getElementById('orderModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('orderModal').style.display = 'none';
+    }
+
+    function processOrder() {
+        closeModal();
+        sendWhatsApp();
+    }
+
+    function sendWhatsApp() {
         let selectedNumber = document.getElementById('wa_contact_select').value;
-        
         let shop = document.getElementById('shopName').value || 'N/A';
         let owner = document.getElementById('custName').value || 'N/A';
         let phone = document.getElementById('custPhone').value || 'N/A';
@@ -242,6 +296,11 @@
 
         let msg = `*📦 NEW ORDER: ISLAM & CO*\n`;
         msg += `*Shop:* ${shop}\n*Owner:* ${owner}\n*Phone:* ${phone}\n*Address:* ${addr}\n`;
+        
+        if(userLocation) {
+            msg += `*Location:* ${userLocation}\n`;
+        }
+
         msg += `--------------------------\n`;
         cart.forEach((i, idx) => { 
             let dText = i.discount > 0 ? ` (Disc: -${i.discount})` : "";
@@ -252,7 +311,6 @@
         msg += `*Grand Total: ${total}*\n`;
         msg += `_Order via Portal_`;
         
-        // Final WhatsApp Link using selected number
         window.location.href = `https://wa.me/${selectedNumber}?text=${encodeURIComponent(msg)}`;
     }
 
