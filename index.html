@@ -67,10 +67,13 @@
     .bill-header-text { font-size: 19px; font-weight: 900; color: #002366; text-transform: uppercase; margin: 0; }
     
     .dist-addr-box { background: transparent; color: #000; display: inline-block; padding: 2px 8px; font-weight: 900; font-size: 10px; border-radius: 0; border: none; text-decoration: underline; }
-    .bill-details { font-size: 12.5px; line-height: 1.2; color: #000; font-weight: 800; margin-top: 2px; }
+    .bill-details { font-size: 12.5px; line-height: 1.4; color: #000; margin-top: 2px; }
+    .bill-details b { font-weight: 900; }
+    .bill-details span { font-weight: 400; }
+
     .bill-table { width: 100%; border-collapse: collapse; margin-top: 5px; color: #000; }
     .bill-table th { border-bottom: 1.5px solid #000; padding: 4px; font-weight: 900; font-size: 11px; text-align: center; }
-    .bill-table td { padding: 5px; font-weight: 800; border-bottom: 1px solid #ccc; font-size: 11px; }
+    .bill-table td { padding: 5px; font-weight: 400; border-bottom: 1px solid #ccc; font-size: 11px; }
     
     .net-box { background: #f2f2f2; color: #000; padding: 8px; margin-top: 8px; font-weight: 900; font-size: 15px; display: flex; justify-content: space-between; border: 1.5px solid #000; border-radius: 8px; }
     
@@ -168,7 +171,7 @@
       </div>
       <div class="net-box"><span>NET AMOUNT:</span><span>Rs. <span id="sumNet">0</span></span></div>
       <div class="text-center mt-3" style="font-size: 10px; font-weight:900; text-transform: uppercase; color:#000; border-top: 1px dashed #000; padding-top: 5px;">
-        Software by Shujaat Raja
+        Powered by Shujaat Raja
       </div>
     </div>
   </div>
@@ -180,7 +183,7 @@
 </div>
 
 <script>
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbymy1wMAPY1HO_dxQeYu0Rid-aUDI2s0lwR3vEIwG7IbVSNBxHzHL3pgOvW3tu_Ot_l/exec";
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzmMjvZmRxrJH2XsuXE8QwsGYK7uxVakLXG-HVs0-xMRPFMBnJkNrn-lPg9QrNv8fPggA/exec";
   let serverData = {rates:[], master:[], promo:""};
   let basket = [];
 
@@ -296,10 +299,26 @@
 
   function processOrder() {
     let targetNum = document.getElementById('waTarget').value;
+    let netAmt = document.getElementById('sumNet').innerText;
+    
+    let orderData = {
+      outletId: document.getElementById('inputId').value || "Manual",
+      outletName: document.getElementById('outName').value,
+      bookerName: document.getElementById('outBooker').value,
+      products: basket.map(i => `${i.name} (x${i.qty})`).join(", "),
+      totalBill: netAmt
+    };
+
+    fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      body: JSON.stringify(orderData)
+    });
+
     let itemsTxt = basket.map(i => `• *${i.name}*%0AQty: ${i.qty} | Disc: ${i.tDisc} | Total: ${i.tPrice}`).join("%0A%0A");
     let loc = document.getElementById('outLoc').value;
     
-    let msg = `*NEW ORDER - ISLAM AND CO*%0A━━━━━━━━━━━━━━━%0A🆔 *Outlet ID:* ${document.getElementById('inputId').value}%0A🏪 *Shop:* ${document.getElementById('outName').value}%0A📞 *Phone:* ${document.getElementById('outPhone').value}%0A👤 *Booker:* ${document.getElementById('outBooker').value}%0A📍 *Location:* ${loc}%0A━━━━━━━━━━━━━━━%0A*Items:*%0A${itemsTxt}%0A━━━━━━━━━━━━━━━%0A💵 *Gross:* Rs.${document.getElementById('sumGross').innerText}%0A🧧 *Disc:* Rs.${document.getElementById('sumDisc').innerText}%0A🔥 *NET AMOUNT:* Rs.${document.getElementById('sumNet').innerText}%0A━━━━━━━━━━━━━━━%0A_Managed by Shujaat Raja_`;
+    let msg = `*NEW ORDER - ISLAM AND CO*%0A━━━━━━━━━━━━━━━%0A🆔 *Outlet ID:* ${orderData.outletId}%0A🏪 *Shop:* ${orderData.outletName}%0A📞 *Phone:* ${document.getElementById('outPhone').value}%0A👤 *Booker:* ${orderData.bookerName}%0A📍 *Location:* ${loc}%0A━━━━━━━━━━━━━━━%0A*Items:*%0A${itemsTxt}%0A━━━━━━━━━━━━━━━%0A💵 *Gross:* Rs.${document.getElementById('sumGross').innerText}%0A🧧 *Disc:* Rs.${document.getElementById('sumDisc').innerText}%0A🔥 *NET AMOUNT:* Rs.${netAmt}%0A━━━━━━━━━━━━━━━%0A_Powered by Shujaat Raja_`;
     window.open(`https://wa.me/${targetNum}?text=${msg}`);
   }
 
